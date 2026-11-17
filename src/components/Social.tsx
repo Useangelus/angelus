@@ -1,10 +1,10 @@
-// X and GitHub links. X is @useangelus (overridable with NEXT_PUBLIC_X_URL); GitHub appears once
-// NEXT_PUBLIC_GITHUB_URL is set at deploy time.
+// X and GitHub links. X is @useangelus (overridable with NEXT_PUBLIC_X_URL); GitHub is the public repo
+// Useangelus/angelus (overridable with NEXT_PUBLIC_GITHUB_URL).
 // Monochrome marks drawn in currentColor so they follow the theme.
 
 export const X_HANDLE = "useangelus";
 const X_URL = process.env.NEXT_PUBLIC_X_URL || `https://x.com/${X_HANDLE}`;
-const GITHUB_URL = process.env.NEXT_PUBLIC_GITHUB_URL || "";
+const GITHUB_URL = process.env.NEXT_PUBLIC_GITHUB_URL || "https://github.com/Useangelus/angelus";
 
 export const hasSocial = Boolean(X_URL || GITHUB_URL);
 

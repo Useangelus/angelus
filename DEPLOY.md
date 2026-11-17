@@ -65,10 +65,9 @@ Every page 200, health `ok`, at least 12 of 16 bells priced. Point an uptime mon
 | `NEXT_PUBLIC_REOWN_PROJECT_ID` | WalletConnect for phones without a wallet browser | dashboard.reown.com (you) |
 | `ANTHROPIC_API_KEY` | The Vigil: one short note per stock at the lock | console.anthropic.com (you) |
 | `NEXT_PUBLIC_TOKEN_CA` | The $ANGELUS contract on `/token` | after the launch on Pons (you) |
-| `NEXT_PUBLIC_GITHUB_URL` | GitHub icon in the header and footer | the public org page |
 | `NEXT_PUBLIC_BELL_REGISTRY`, `KEEPER_PRIVATE_KEY`, `ROBINHOOD_RPC_URL` | The nightly on-chain seal | step 7 |
 
-X (`@useangelus`) is already wired in.
+X (`@useangelus`) and GitHub (`Useangelus/angelus`) are already wired in.
 
 ## 7. The on-chain seal (optional)
 

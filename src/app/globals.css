@@ -315,4 +315,4 @@ main:focus { outline: none; }
 /* the narrowest phones: tighten the clock label so "ET" still fits */
 @media (max-width: 380px) { .mast-bell-label { letter-spacing: 0.02em; } .mast-bell { gap: 7px; } }
 /* small laptops: the full nav plus both switches; tighten the nav a little so the clock keeps its words */
-@media (min-width: 1181px) and (max-width: 1300px) { .nav { gap: 15px; } .mast-in { gap: 22px; } }
+@media (min-width: 1181px) { .nav { gap: 14px; } .mast-in { gap: 18px; } .social-head { gap: 6px; } }
