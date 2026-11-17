@@ -11,7 +11,7 @@ const env = Object.fromEntries(
     .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1)]),
 );
 // Local-only values the site never reads (the database password stays on this machine).
-const SKIP = new Set(["SUPABASE_DB_PASSWORD"]);
+const SKIP = new Set(["SUPABASE_DB_PASSWORD", "KEEPER_ADDRESS"]);
 for (const [k, v] of Object.entries(env)) {
   if (SKIP.has(k)) continue;
   const pub = k.startsWith("NEXT_PUBLIC_");

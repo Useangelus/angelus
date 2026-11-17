@@ -31,7 +31,7 @@ The full method, every formula and the clock are on the site's Method page (`/do
 
 - It refuses a seal after 13:30 UTC on the session day, which is never later than the 09:30 ET open.
 - One seal per night, only forward in time, no edit or delete, and no funds held.
-- Not deployed yet. Until it is, locked numbers are published on the nightly edition and at `/api/bell.json`.
+- Deployed at [`0x8c4dD82cB1560B3f4DC5293e2C159DeD2a5b9ccf`](https://robinhoodchain.blockscout.com/address/0x8c4dD82cB1560B3f4DC5293e2C159DeD2a5b9ccf) (verified source on Blockscout).
 
 ```bash
 cd contracts
