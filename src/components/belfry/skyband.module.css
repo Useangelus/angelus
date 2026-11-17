@@ -1,0 +1,20 @@
+.band { position: relative; padding-top: 150px; }
+.tall { padding-top: 190px; }
+.scene { position: absolute; inset: 0 0 auto 0; height: 340px; overflow: hidden; }
+.tall .scene { height: 380px; }
+.sky { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.wall { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; }
+.wall path { fill: #141414; }
+:global([data-theme="light"]) .wall path { fill: #d6d6d6; }
+.fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--bg) 75%, transparent) 50%, var(--bg));
+}
+.content { position: relative; }
+
+@media (max-width: 640px) {
+  .band { padding-top: 110px; }
+  .tall { padding-top: 130px; }
+  .scene { height: 250px; }
+  .tall .scene { height: 280px; }
+}

@@ -1,0 +1,59 @@
+.hero { position: relative; height: calc(100svh - 64px); min-height: 640px; max-height: 980px; }
+.stage { position: absolute; inset: 0; }
+.loading { position: absolute; inset: 0; background: #000; }
+:global([data-theme="light"]) .loading { background: #f2f2f2; }
+.fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 52%; pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--bg) 70%, transparent) 45%, var(--bg) 100%);
+}
+.over {
+  position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto;
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: end; padding-bottom: 40px;
+  pointer-events: none;
+}
+.over > * { pointer-events: auto; }
+.copy { display: flex; flex-direction: column; gap: 16px; max-width: 640px; }
+.h1 { font-size: clamp(40px, 4.6vw, 72px); line-height: 0.96; letter-spacing: -0.03em; font-weight: 300; margin: 0; }
+.h1 span { display: block; }
+.h1 em { font-style: italic; color: var(--bronze); }
+.legend { margin: 0; font-size: 18px; line-height: 1.5; color: var(--mute); max-width: 34em; }
+.state { margin: 0; font-family: var(--f-mono), monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--verd); max-width: 52em; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+
+.panel {
+  border: 1px solid var(--rule-2); background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(6px); padding: 16px 20px; border-radius: 2px;
+}
+.pHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.pTk { font-size: 34px; font-weight: 300; letter-spacing: -0.01em; }
+.pBell { margin: 0; font-family: var(--f-mono), monospace; font-size: 34px; color: var(--bronze); letter-spacing: -0.03em; }
+.pGrid { margin: 0 0 14px; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); }
+.pGrid div { padding: 8px 0 6px; border-bottom: 1px solid var(--rule); }
+.pGrid div:nth-child(odd) { padding-right: 10px; border-right: 1px solid var(--rule); }
+.pGrid div:nth-child(even) { padding-left: 12px; }
+.pGrid dt { font-family: var(--f-mono), monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); }
+.pGrid dd { margin: 2px 0 0; font-family: var(--f-mono), monospace; font-size: 14px; }
+.pLink { font-family: var(--f-mono), monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; display: flex; justify-content: space-between; border-top: 1px solid var(--rule-2); padding-top: 12px; }
+.pLink:hover { color: var(--bronze); }
+
+.stockHero { position: relative; height: 560px; }
+.stockOver { position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto; padding-bottom: 8px; }
+@media (max-width: 640px) {
+  .stockHero { height: auto; }
+  .stockHero .stage { position: relative; height: 300px; }
+  .stockOver { position: relative; margin-top: -24px; }
+}
+
+@media (min-width: 901px) and (max-height: 860px) {
+  .pGrid { display: none; }
+  .legend { font-size: 16px; }
+  .over { padding-bottom: 28px; }
+}
+
+@media (max-width: 900px) {
+  .hero { height: auto; max-height: none; min-height: 0; }
+  .stage { position: relative; height: 66svh; min-height: 420px; }
+  .fade { height: 12%; }
+  .over { position: relative; grid-template-columns: 1fr; gap: 28px; padding-top: 8px; }
+  .panel { order: -1; margin-top: -40px; position: relative; }
+}

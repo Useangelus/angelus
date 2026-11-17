@@ -1,0 +1,34 @@
+.strip { padding: 28px 0 0; }
+/* Room for the "now" time label, which sits 38px above the track. */
+.top { display: flex; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 48px; }
+.b { color: var(--ink); font-weight: 500; }
+.track { position: relative; height: 56px; border-top: 1px solid var(--rule-2); }
+.past {
+  position: absolute; left: 0; top: -1px; height: 1px; background: var(--ink);
+}
+.past::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 1px; height: 22px;
+  background: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 7px);
+}
+.tick, .mark, .now { position: absolute; top: 0; height: 22px; border-left: 1px solid var(--rule-2); }
+.tick i, .mark i, .now i {
+  position: absolute; top: 28px; left: 0; transform: translateX(-50%); font-style: normal; white-space: nowrap;
+  font-family: var(--f-mono), monospace; font-size: 11px; letter-spacing: 0.06em; color: var(--faint); text-transform: uppercase;
+}
+.tick { height: 10px; }
+.tick i { top: 14px; }
+.mark { height: 30px; border-left-color: var(--mute); }
+.mark i { top: 34px; color: var(--mute); }
+.start i { transform: none; }
+.end i { transform: translateX(-100%); }
+.lock { border-left: 1px dashed var(--bronze); }
+.lock i { color: var(--bronze); }
+.now { top: -12px; height: 36px; border-left: 1px solid var(--verd); }
+.now::before { content: ""; position: absolute; top: -4px; left: -4px; width: 7px; height: 7px; border-radius: 50%; background: var(--verd); }
+.now i { top: -26px; color: var(--verd); }
+
+@media (max-width: 640px) {
+  .tick i { display: none; }
+  .lock i { transform: translateX(calc(-100% + 1px)); padding-right: 6px; }
+  .mark i, .now i { font-size: 10px; }
+}
