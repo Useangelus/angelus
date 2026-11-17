@@ -1,0 +1,318 @@
+/* ANGELUS — a book of hours for the stock market's night. Black and white only.
+   Direction is carried by sign and shape (filled = up, hollow = down), never by colour.
+   --bronze / --verd / --up / --down are kept as names so components stay unchanged;
+   in this palette they all resolve to ink or grey. */
+
+:root[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --bg-2: #141414;
+  --ink: #f2f2f2;
+  --mute: #9a9a9a;
+  --faint: #7f7f7f; /* 4.9:1 on the dark page, the lightest grey still readable */
+  --rule: rgba(255, 255, 255, 0.12);
+  --rule-2: rgba(255, 255, 255, 0.3);
+  --verd: #f2f2f2;
+  --bronze: #ffffff;
+  --up: #f2f2f2;
+  --down: #f2f2f2;
+  --wash: rgba(255, 255, 255, 0.05);
+  --tile: #ffffff;
+  --tile-dark: #000000;
+  color-scheme: dark;
+}
+
+:root,
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-2: #f2f2f2;
+  --ink: #0a0a0a;
+  --mute: #5e5e5e;
+  --faint: #767676; /* 4.5:1 on white, the lightest grey still readable */
+  --rule: rgba(0, 0, 0, 0.12);
+  --rule-2: rgba(0, 0, 0, 0.3);
+  --verd: #0a0a0a;
+  --bronze: #000000;
+  --up: #0a0a0a;
+  --down: #0a0a0a;
+  --wash: rgba(0, 0, 0, 0.04);
+  --tile: #ffffff;
+  --tile-dark: #0a0a0a;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+/* Scrollbars in the same black and white, following the theme. */
+html { scrollbar-color: var(--faint) var(--bg); scrollbar-width: thin; }
+* { scrollbar-color: var(--faint) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 0; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--mute); }
+::-webkit-scrollbar-corner { background: var(--bg); }
+html, body { margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-serif), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.55;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 1.2s ease, color 1.2s ease;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+a.u, .prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--rule-2); }
+a.u:hover, .prose a:hover { text-decoration-color: var(--ink); }
+::selection { background: var(--verd); color: var(--bg); }
+
+:focus-visible { outline: 1px solid var(--verd); outline-offset: 3px; }
+
+.mono { font-family: var(--f-mono), ui-monospace, monospace; font-feature-settings: "tnum" 1, "zero" 1; }
+.num { font-family: var(--f-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.label {
+  font-family: var(--f-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.up { color: var(--up); }
+.down { color: var(--down); }
+.mute { color: var(--mute); }
+.faint { color: var(--faint); }
+.it { font-style: italic; }
+
+.wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } body { font-size: 17px; } }
+
+/* ---------- header ---------- */
+.mast { border-bottom: 1px solid var(--rule); position: sticky; top: 0; z-index: 20; background: var(--bg); transition: background-color 1.2s ease; }
+.mast-in { display: flex; align-items: center; gap: 28px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-word { font-size: 17px; letter-spacing: 0.32em; font-weight: 500; padding-left: 2px; }
+.nav { display: flex; gap: 22px; margin-left: auto; }
+.nav a { white-space: nowrap; font-family: var(--f-mono), monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mute); padding: 4px 0; border-bottom: 1px solid transparent; }
+.nav a:hover { color: var(--ink); }
+.nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--verd); }
+.mast-bell { font-family: var(--f-mono), monospace; font-size: 12px; color: var(--mute); white-space: nowrap; display: flex; align-items: center; gap: 10px; padding: 6px 10px; margin-right: -10px; border-radius: 2px; }
+.mast-bell:hover { background: var(--wash); }
+.mast-bell-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+/* On the narrowest phones the label gives way (ellipsis) before the buttons are pushed off screen. */
+.mast-bell { min-width: 0; }
+.mast-bell-label { overflow: hidden; text-overflow: ellipsis; }
+.mast-bell-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); }
+.mast-bell b { color: var(--ink); font-weight: 500; font-size: 13px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--verd); display: inline-block; }
+.dot.off { background: var(--faint); }
+/* Social links: icons in the header and footer, labelled rows in the phone menu. */
+.social { display: inline-flex; align-items: center; gap: 12px; }
+.social a { display: inline-flex; align-items: center; gap: 8px; color: var(--mute); padding: 4px; }
+.social a:hover { color: var(--ink); }
+.social-menu { display: none; }
+@media (max-width: 1180px) {
+  .social-head { display: none; }
+  .nav.open .social-menu { display: flex; gap: 22px; padding: 14px 0 4px; }
+  .nav.open .social-menu a { border: 0; padding: 0; font-size: 13px; }
+}
+.theme-btn {
+  display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--rule-2); color: var(--ink);
+  font-family: var(--f-mono), monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 6px 10px; border-radius: 2px; cursor: pointer;
+}
+.theme-btn:hover { border-color: var(--ink); }
+/* the sound and theme switches sit together as a pair (8 px apart) */
+.sound-btn { margin-right: -20px; }
+@media (max-width: 1180px) { .sound-btn { margin-right: -4px; } }
+.sound-btn[aria-pressed="false"] { color: var(--mute); }
+/* the labelled sound row lives in the phone menu only; on the smallest phones the header icon moves there */
+.sound-row { display: none; }
+@media (max-width: 480px) {
+  .sound-head { display: none; }
+  .nav.open .sound-row { display: block; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: var(--f-mono), monospace; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; padding: 12px 0; cursor: pointer; }
+}
+@media (max-width: 1180px) { .theme-label { display: none; } .theme-btn { padding: 6px 7px; } }
+.menu-btn { display: none; margin-left: auto; background: none; border: 1px solid var(--rule-2); color: var(--ink); font-family: var(--f-mono), monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 10px; border-radius: 2px; cursor: pointer; }
+
+@media (max-width: 1180px) {
+  .mast-in { gap: 12px; }
+  .mast-bell { padding: 6px 4px; margin-right: 0; }
+  .nav { display: none; }
+  .menu-btn { display: block; }
+  .mast-bell { margin-left: 0; }
+  .nav.open {
+    display: flex; flex-direction: column; gap: 0; position: absolute; top: 64px; left: 0; right: 0;
+    background: var(--bg); border-bottom: 1px solid var(--rule); padding: 8px 16px 16px;
+  }
+  .nav.open a { padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 13px; }
+}
+@media (max-width: 420px) { .brand-word { display: none; } }
+
+/* ---------- type ---------- */
+h1, h2, h3 { font-weight: 300; margin: 0; letter-spacing: -0.018em; }
+.display { font-size: clamp(44px, 6.2vw, 96px); line-height: 0.94; letter-spacing: -0.03em; font-weight: 300; }
+.display em { font-style: italic; font-weight: 300; color: var(--bronze); }
+.h2 { font-size: clamp(32px, 4.2vw, 56px); line-height: 1.02; letter-spacing: -0.024em; }
+.h2 em { font-style: italic; color: var(--bronze); }
+.h3 { font-size: 26px; line-height: 1.15; }
+.lede { font-size: clamp(19px, 1.6vw, 22px); line-height: 1.5; color: var(--mute); max-width: 36em; }
+.prose { max-width: 40em; }
+.prose p { margin: 0 0 1em; }
+.prose h3 { margin: 2em 0 0.5em; font-size: 26px; }
+
+/* ---------- section scaffolding ---------- */
+.sec { padding: 96px 0; border-top: 1px solid var(--rule); }
+.sec-head { display: grid; grid-template-columns: 180px 1fr; gap: 28px; margin-bottom: 48px; align-items: baseline; }
+.sec-head .label { padding-top: 10px; }
+@media (max-width: 760px) {
+  .sec { padding: 64px 0; }
+  .sec-head { grid-template-columns: 1fr; gap: 10px; margin-bottom: 32px; }
+}
+
+/* ---------- ledger tables ---------- */
+.ledger { width: 100%; border-collapse: collapse; }
+.ledger th { text-align: right; font-family: var(--f-mono), monospace; font-weight: 400; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); padding: 0 12px 12px; border-bottom: 1px solid var(--rule-2); white-space: nowrap; }
+.ledger td { text-align: right; padding: 15px 12px; border-bottom: 1px solid var(--rule); font-family: var(--f-mono), monospace; font-variant-numeric: tabular-nums; font-size: 14px; white-space: nowrap; }
+.ledger th:first-child, .ledger td:first-child { text-align: left; padding-left: 0; }
+.ledger th:last-child, .ledger td:last-child { padding-right: 0; }
+.ledger tr.link { cursor: pointer; }
+.ledger tr.link:hover td { background: var(--wash); }
+.ledger .tk { font-family: var(--f-serif), serif; font-size: 20px; letter-spacing: 0.01em; }
+.ledger .tk small { display: block; font-family: var(--f-mono), monospace; font-size: 11px; color: var(--faint); letter-spacing: 0.02em; }
+.ledger .bell { color: var(--bronze); font-weight: 500; }
+.ledger td.best { font-weight: 600; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.ledger td.sep, .ledger th.sep { border-left: 1px solid var(--rule); }
+@media (max-width: 560px) {
+  .ledger .hide-sm { display: none; }
+  .ledger td, .ledger th { padding-left: 8px; padding-right: 8px; }
+  .call-btn { padding: 8px 9px !important; font-size: 11px; }
+  .calls-sheet .tk > span > span:first-child { display: none !important; }
+  .calls-sheet .tk small { display: none; }
+}
+@media (max-width: 640px) {
+  .stock-head { grid-template-columns: 1fr !important; }
+  .stock-head > div:last-child { text-align: left !important; }
+  .doc-row { grid-template-columns: 1fr !important; gap: 10px !important; }
+}
+.scroll-x {
+  overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -28px; padding: 0 28px;
+  /* Edge shadows that appear only while there is more table to scroll to. */
+  background:
+    linear-gradient(to right, var(--bg) 40%, transparent) left / 36px 100% no-repeat local,
+    linear-gradient(to left, var(--bg) 40%, transparent) right / 36px 100% no-repeat local,
+    linear-gradient(to right, var(--rule-2), transparent) left / 14px 100% no-repeat scroll,
+    linear-gradient(to left, var(--rule-2), transparent) right / 14px 100% no-repeat scroll;
+}
+@media (max-width: 640px) { .scroll-x { margin: 0 -16px; padding: 0 16px; } }
+
+/* Wide and narrow versions of the same figure. */
+.only-narrow { display: none; }
+@media (max-width: 760px) { .only-wide { display: none; } .only-narrow { display: block; } }
+
+/* Wide ledgers on tablets and phones: the stock column stays put while the numbers scroll. */
+@media (max-width: 1100px) {
+  .scroll-x .ledger th:first-child, .scroll-x .ledger td:first-child {
+    position: sticky; left: 0; z-index: 1; background: var(--bg);
+
+  }
+  .scroll-x .ledger tr.link:hover td:first-child { background: var(--bg); }
+  /* Mask the strip of padding to the left of the pinned column. */
+  .scroll-x .ledger th:first-child::before, .scroll-x .ledger td:first-child::before {
+    content: ""; position: absolute; top: 0; bottom: 0; right: 100%; width: 32px; background: var(--bg);
+  }
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-mono), monospace; font-size: 12px; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 13px 18px; border: 1px solid var(--ink); color: var(--bg); background: var(--ink); border-radius: 2px; cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn:hover { background: transparent; color: var(--ink); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule-2); }
+.btn.ghost:hover { border-color: var(--ink); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn .arr { font-family: var(--f-serif), serif; font-size: 16px; text-transform: none; letter-spacing: 0; }
+
+/* ---------- footer ---------- */
+.foot { border-top: 1px solid var(--rule); padding: 56px 0 40px; margin-top: 40px; }
+.foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 40px; }
+.foot p { margin: 0 0 10px; color: var(--mute); font-size: 15px; }
+.foot a { color: var(--mute); }
+.foot a:hover { color: var(--ink); }
+.foot ul { list-style: none; padding: 0; margin: 0; }
+.foot li { margin-bottom: 8px; font-size: 15px; }
+.colophon { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+@media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+/* ---------- misc ---------- */
+.pill { display: inline-block; font-family: var(--f-mono), monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--rule-2); padding: 3px 8px; border-radius: 2px; color: var(--mute); }
+.pill.live { color: var(--verd); border-color: var(--verd); }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; }
+.grid-2 > * { min-width: 0; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; gap: 36px; } }
+.stat { display: flex; flex-direction: column; gap: 6px; }
+.stat .v { font-family: var(--f-mono), monospace; font-size: 28px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.note { font-size: 14px; color: var(--mute); line-height: 1.55; }
+.hr { height: 1px; background: var(--rule); border: 0; margin: 40px 0; }
+
+/* ---------- scroll ----------
+   Driven by the scroll position itself (CSS scroll timelines), no JavaScript.
+   Browsers without scroll timelines simply show everything at rest. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Content rises into place as it enters the window. */
+    .sec-head, .prose, .note, .stat, .ledger tbody tr, .grid-2 > *, .foot-grid > *, main img {
+      animation: angelus-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+    @keyframes angelus-rise {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* Section headings: the hairline above each section draws itself in. */
+    .sec { position: relative; border-top-color: transparent; }
+    .sec::before {
+      content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1px; background: var(--rule);
+      transform-origin: 0 50%;
+      animation: angelus-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+    @keyframes angelus-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    /* How far down the page you are: a hairline under the masthead. */
+    .mast::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--ink);
+      transform-origin: 0 50%;
+      animation: angelus-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+    @keyframes angelus-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* Keyboard users: jump past the masthead. Hidden until focused. */
+.skip {
+  position: fixed; left: 12px; top: 10px; z-index: 100;
+  padding: 10px 14px; background: var(--ink); color: var(--bg);
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  transform: translateY(-160%); transition: transform 0.15s;
+}
+.skip:focus { transform: none; }
+main:focus { outline: none; }
+
+/* the narrowest phones: tighten the clock label so "ET" still fits */
+@media (max-width: 380px) { .mast-bell-label { letter-spacing: 0.02em; } .mast-bell { gap: 7px; } }
+/* small laptops: the full nav plus both switches; tighten the nav a little so the clock keeps its words */
+@media (min-width: 1181px) and (max-width: 1300px) { .nav { gap: 15px; } .mast-in { gap: 22px; } }
