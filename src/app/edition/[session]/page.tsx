@@ -8,10 +8,10 @@ import SkyBand from "@/components/belfry/SkyBand";
 import CopyText from "@/components/CopyText";
 import { pageMeta } from "@/lib/meta";
 import SealNote from "@/components/SealNote";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
 
-const site = () => process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3217";
 
 export async function generateMetadata({ params }: { params: Promise<{ session: string }> }): Promise<Metadata> {
   const { session } = await params;
@@ -30,7 +30,7 @@ export default async function EditionPage({ params }: { params: Promise<{ sessio
   const days = sessionsOf(rec.rows);
   const prev = days.filter((d) => d < e.session).at(-1);
   const next = days.find((d) => d > e.session) ?? (e.live ? undefined : "latest");
-  const caption = editionCaption(e, site());
+  const caption = editionCaption(e, SITE_URL);
   const img = `/edition/${e.session}/image`;
 
   return (

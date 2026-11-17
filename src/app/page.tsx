@@ -10,6 +10,7 @@ import Horae from "@/components/Horae";
 import Spark from "@/components/Spark";
 import s from "./home.module.css";
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
@@ -18,7 +19,7 @@ const LD = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "ANGELUS",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3217",
+  url: SITE_URL,
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any",
   description: "Agents on Robinhood Chain that read tokenized stocks while Wall Street is closed, publish the next opening price, and grade themselves at the bell.",

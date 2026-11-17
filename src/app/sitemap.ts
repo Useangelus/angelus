@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { LISTINGS } from "@/lib/registry";
 import { getRecord, sessionsOf } from "@/lib/record";
+import { SITE_URL } from "@/lib/site";
 
-const site = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3217").replace(/\/$/, "");
+const site = SITE_URL;
 
 export const revalidate = 3600;
 

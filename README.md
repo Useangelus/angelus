@@ -1,54 +1,57 @@
 # ANGELUS
 
-Agents that read tokenized stocks while Wall Street is closed, publish an estimate of the next official opening price ("the Bell"), and grade themselves at the bell.
+Wall Street sleeps sixteen hours a day. Its stocks keep trading through all of them, as tokens on public blockchains.
 
-## Run
+ANGELUS reads those after-hours tokens and publishes, every night, where each stock should open at 09:30 ET: **the Bell**. At the open it grades itself against the official price, in public, every morning.
 
-```bash
-npm install
-npm run dev -- -p 3217
-```
+X: [@useangelus](https://x.com/useangelus)
 
-No keys are needed locally. Calls and nightly locks are stored as JSON in `.data/`.
+## How it works
 
-## Data
+- **16 stocks.** NVDA, TSLA, AAPL, MSFT, AMZN, META, GOOGL, AMD, PLTR, COIN, MSTR, CRCL, NFLX, AVGO, SPY, QQQ.
+- **Three chains.** Tokenized versions trade on Robinhood Chain (Robinhood), Solana (xStocks) and Ethereum (Ondo). Every pool is read live from DexScreener.
+- **Three agents.** Lauds averages the chains by pool depth, Terce splits the move into market and stock-specific parts, and Compline learns how far night books misjudge the size of a move. The Bell blends them, weighting each by its recent error against real opens: an agent that misses more is heard less.
+- **04:00 ET lock.** The night's numbers are frozen before the bell, so the score cannot be adjusted after the fact.
+- **09:30 ET grade.** The official open settles every Bell. The miss, in basis points, goes on the public record.
+- **Calls.** Anyone can call over or under the Bell by signing a plain message with a wallet. Free: no transaction, no gas, no deposit and no prizes.
 
-- Live pool prices: DexScreener (`token-pairs/v1`), Robinhood Chain, Solana (xStocks), Ethereum (Ondo).
-- Official daily open/close: Yahoo Finance chart API.
-- Hourly history for the replayed record: GeckoTerminal (rate limited, roughly one request a minute when busy).
+The full method, every formula and the clock are on the site's Method page (`/docs`).
 
-## The record
+## Open data
 
-- `src/data/record.json` is the replayed history shipped with the build. Rebuild it locally with `GET /api/cron/record` on the dev server (slow, resumable; candles are cached in `.data/`), then copy `.data/record.json` over it.
-- In production, `/api/cron/lock` stores the board at 04:00 ET each night (Vercel cron at 08:00 and 09:00 UTC; only the run inside the hour after 04:00 ET acts). The official open settles it when the record is read.
+| Endpoint | What it returns |
+|---|---|
+| `/api/bell.json` | Tonight's Bell for every stock, each agent's estimate and weight, the price and depth on every chain, and the record so far |
+| `/api/seals` | Every on-chain seal with the numbers sent, so anyone can rebuild the digest |
+| `/api/health` | Whether price sources and storage are up |
 
-## Deploy (Vercel)
+## On-chain seal
 
-The full launch, step by step with scripts, is in [DEPLOY.md](DEPLOY.md). The summary:
+`contracts/src/BellRegistry.sol` keeps one receipt per night on Robinhood Chain (chain ID 4663): the digest of each stock's prior close and Bell, written at the 04:00 ET lock.
 
-Keys and accounts needed:
-
-1. Supabase project: `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (no service-role key). Generate `ANGELUS_DB_TOKEN` (long random string), run `supabase/schema.sql`, then `select private.angelus_set_token('<token>');`. The tables are closed to the publishable key; the site reads and writes only through the `angelus_*` functions, which check the token.
-2. `CRON_SECRET`: any long random string.
-3. `NEXT_PUBLIC_SITE_URL`: the production domain.
-4. `NEXT_PUBLIC_TOKEN_CA`: only after the token launches.
-5. `NEXT_PUBLIC_REOWN_PROJECT_ID` (optional): WalletConnect for phone users without a wallet browser.
-6. `ANTHROPIC_API_KEY` (optional): turns on the Vigil, one short note per stock written by Claude Opus 5.5 at the 04:00 ET lock, with server-side refusal fallback enabled. One request per night.
-7. `NEXT_PUBLIC_BELL_REGISTRY`, `KEEPER_PRIVATE_KEY`, `ROBINHOOD_RPC_URL` (optional): the nightly on-chain seal, below.
-
-Without Supabase the site still renders, but calls cannot be saved and nightly locks are not kept.
-
-## The on-chain seal (contracts/)
-
-`contracts/src/BellRegistry.sol` keeps one receipt per night on Robinhood Chain (chain ID 4663): the digest of each stock's prior close and Bell, written at the 04:00 ET lock. The contract refuses a seal after 13:30 UTC on the session day (never later than the 09:30 ET open), accepts one per night, only moves forward, cannot edit or delete, and holds no funds. `/api/seals` lists every seal with the numbers sent, so anyone can rebuild the digest.
+- It refuses a seal after 13:30 UTC on the session day, which is never later than the 09:30 ET open.
+- One seal per night, only forward in time, no edit or delete, and no funds held.
+- Not deployed yet. Until it is, locked numbers are published on the nightly edition and at `/api/bell.json`.
 
 ```bash
 cd contracts
-forge install foundry-rs/forge-std --no-git   # once
+forge install foundry-rs/forge-std --no-git
 forge test
-OWNER=0x... KEEPER=0x... forge script script/Deploy.s.sol --rpc-url robinhood --broadcast --private-key <deployer key>
 ```
 
-OWNER should be a cold wallet: it can only rotate the keeper. KEEPER is the hot key on the server; it needs a little ETH for gas (about 140k gas a night). Then set the three variables above and redeploy. The lock never fails because of the seal: if a seal does not land, the second cron run retries it.
+## Built with
 
-After the first deploy, run `supabase/cron.sql` (with the site URL and `CRON_SECRET` filled in). It calls the lock at exactly 08:00 and 09:00 UTC from Supabase. Vercel's Hobby crons can fire anywhere inside their hour, which could lock as late as 04:59 ET; the Vercel crons stay as a backup and a repeat call does nothing.
+Next.js 16, three.js for the belfry, viem and WalletConnect for signed calls, Supabase (behind token-checked SQL functions, no service-role key), Foundry for the contract, and Remotion for the film in `video/`.
+
+## Run it yourself
+
+```bash
+npm install
+npm run dev
+```
+
+No keys are needed: prices come from public APIs, and calls and nightly locks are stored as JSON in `.data/`. Optional variables are listed in `.env.example`; the full launch steps are in [DEPLOY.md](DEPLOY.md).
+
+## Disclaimer
+
+ANGELUS publishes estimates, not investment advice. It is independent and not affiliated with Robinhood, Nasdaq, NYSE, any listed company or any token issuer. Company names and logos belong to their owners.

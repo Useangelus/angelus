@@ -19,8 +19,10 @@ Add to `.env.production.local`:
 ```
 SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-NEXT_PUBLIC_SITE_URL=https://<domain or project>.vercel.app
+NEXT_PUBLIC_SITE_URL=https://<domain>
 ```
+
+`NEXT_PUBLIC_SITE_URL` is optional: without it the site uses Vercel's production domain. `--cron` in step 4 needs it.
 
 ## 2. Database
 

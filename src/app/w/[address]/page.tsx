@@ -8,6 +8,7 @@ import { walletRecord } from "@/lib/wallet";
 import { TickerCell } from "@/components/BellGlyph";
 import SkyBand from "@/components/belfry/SkyBand";
 import { pageMeta } from "@/lib/meta";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 60;
 
@@ -109,7 +110,6 @@ export default async function WalletPage({ params }: { params: Promise<{ address
 }
 
 function ShareRecord({ text, path }: { text: string; path: string }) {
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3217").replace(/\/$/, "");
-  const href = `https://x.com/intent/post?via=useangelus&text=${encodeURIComponent(text)}&url=${encodeURIComponent(site + path)}`;
+  const href = `https://x.com/intent/post?via=useangelus&text=${encodeURIComponent(text)}&url=${encodeURIComponent(SITE_URL + path)}`;
   return <a className="btn ghost" href={href} target="_blank" rel="noreferrer">Post this record on X</a>;
 }
