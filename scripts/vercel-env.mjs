@@ -10,7 +10,10 @@ const env = Object.fromEntries(
     .filter((l) => /^[A-Z0-9_]+=.+/.test(l))
     .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1)]),
 );
+// Local-only values the site never reads (the database password stays on this machine).
+const SKIP = new Set(["SUPABASE_DB_PASSWORD"]);
 for (const [k, v] of Object.entries(env)) {
+  if (SKIP.has(k)) continue;
   const pub = k.startsWith("NEXT_PUBLIC_");
   // remove first so re-running updates a value instead of failing on "already exists"
   spawnSync("npx", ["--yes", "vercel@latest", "env", "rm", k, "production", "--yes"], { stdio: "ignore", shell: true });

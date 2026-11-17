@@ -60,3 +60,6 @@ next-env.d.ts
 
 # generated SQL with secrets (scripts/supabase-sql.mjs)
 /supabase/.generated.sql
+
+# Supabase CLI cache
+/supabase/.temp/
