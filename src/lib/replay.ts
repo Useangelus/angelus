@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { LISTINGS, type ChainId } from "./registry";
 import { hourly } from "./sources";
 import { closeMinutes, nyTime, prevTradingDay } from "./clock";
@@ -21,7 +22,7 @@ export async function replayable(): Promise<string[]> {
   return sessionsOf(rec.rows).filter((s) => +nyTime(prevTradingDay(s), 16) > since).reverse();
 }
 
-export async function nightOf(session: string): Promise<Replay | null> {
+async function build(session: string): Promise<Replay | null> {
   const rec = await getRecord();
   const rows = rec.rows.filter((r) => r.session === session);
   if (!rows.length) return null;
@@ -60,4 +61,27 @@ export async function nightOf(session: string): Promise<Replay | null> {
   const list = stocks.filter((s): s is ReplayStock => s != null);
   if (!list.some((s) => s.gaps.some((g) => g != null))) return null;
   return { session, prevDay, start, lock, end, hours, stocks: list, live: rows[0].src === "live" };
+}
+
+// A past night never changes, so a finished build is kept for an hour. One with stocks missing (GeckoTerminal
+// rate-limited it) is served once but not kept, so the next visitor gets a fresh try.
+class Partial { constructor(readonly night: Replay | null) {} }
+const kept = unstable_cache(
+  async (session: string) => {
+    const night = await build(session);
+    const full = night != null && night.stocks.filter((s) => s.gaps.some((g) => g != null)).length >= night.stocks.length - 1;
+    if (!full) throw new Partial(night);
+    return night;
+  },
+  ["replay-night-v1"],
+  { revalidate: 3600 },
+);
+
+export async function nightOf(session: string): Promise<Replay | null> {
+  try {
+    return await kept(session);
+  } catch (e) {
+    if (e instanceof Partial) return e.night;
+    throw e;
+  }
 }
