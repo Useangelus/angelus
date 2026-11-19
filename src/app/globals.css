@@ -368,3 +368,87 @@ main:focus { outline: none; }
 .copy-ca .num { flex: 1; min-width: 0; font-size: 15px; word-break: break-all; color: var(--ink); }
 .token-links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
 .menu-clock { display: none; }
+
+/* verify: three steps and a verdict */
+.verify { max-width: 980px; }
+.v-pick { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 0 0 28px; border-bottom: 1px solid var(--rule); }
+.v-pick select { font: 15px var(--f-mono), monospace; padding: 10px 12px; border: 1px solid var(--rule-2); background: var(--bg); color: var(--ink); border-radius: 2px; }
+.v-steps { list-style: none; margin: 0; padding: 0; }
+.v-steps > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 20px; padding: 32px 0; border-bottom: 1px solid var(--rule); }
+.v-n { font-family: var(--f-mono), monospace; font-size: 13px; letter-spacing: 0.12em; color: var(--faint); padding-top: 6px; }
+.v-steps h3 { font-size: clamp(22px, 2.4vw, 30px); margin-bottom: 8px; }
+.v-table { margin-top: 16px; max-width: 560px; }
+.v-hash { display: block; margin-top: 14px; padding: 14px 16px; border: 1px solid var(--rule-2); font-family: var(--f-mono), monospace; font-size: 14px; word-break: break-all; color: var(--ink); background: var(--wash); }
+.v-verdict { margin: 32px 0 20px; padding: 22px 24px; border: 1px solid var(--rule-2); font-size: 19px; line-height: 1.45; }
+.v-verdict b { font-weight: 500; }
+.v-verdict.ok { border: 2px solid var(--ink); }
+.v-verdict.ok b::before { content: "✓ "; }
+.v-verdict.bad { border: 2px dashed var(--ink); }
+.v-self summary { cursor: pointer; padding: 10px 0; display: inline-block; list-style: none; }
+.v-self summary::-webkit-details-marker { display: none; }
+@media (max-width: 640px) { .v-steps > li { grid-template-columns: 1fr; gap: 6px; } .v-hash { font-size: 12.5px; } }
+
+/* replay: the tower, a clock, the track of the night, sixteen readings */
+.rp-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: end; padding-top: 56px; padding-bottom: 28px; }
+.rp-stage { position: relative; height: min(68vh, 720px); min-height: 420px; overflow: hidden; background: #000; }
+:root[data-theme="light"] .rp-stage { background: #f2f2f2; }
+.rp-hud { position: absolute; left: 0; right: 0; top: 0; pointer-events: none; }
+.rp-hud > div { max-width: 1240px; margin: 0 auto; padding: 22px 28px; display: flex; flex-direction: column; gap: 4px; }
+.rp-clock { font-family: var(--f-mono), monospace; font-weight: 500; font-size: clamp(44px, 6vw, 84px); letter-spacing: 0.02em; color: var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
+.rp-controls { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 22px 0 10px; border-bottom: 1px solid var(--rule); }
+.rp-controls .btn { min-width: 104px; justify-content: center; }
+.rp-track { position: relative; padding-bottom: 22px; }
+.rp-track input[type="range"] { width: 100%; accent-color: var(--ink); cursor: pointer; }
+.rp-marks { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; }
+.rp-marks span { position: absolute; transform: translateX(-50%); font-family: var(--f-mono), monospace; font-size: 10.5px; letter-spacing: 0.08em; color: var(--mute); white-space: nowrap; }
+.rp-marks span:first-child { transform: none; }
+.rp-marks .rp-end { transform: translateX(-100%); }
+.rp-marks .rp-lock { color: var(--ink); }
+.rp-night { display: flex; align-items: center; gap: 10px; }
+.rp-night select { font: 13px var(--f-mono), monospace; padding: 8px 10px; border: 1px solid var(--rule-2); background: var(--bg); color: var(--ink); border-radius: 2px; }
+.rp-grid { display: grid; grid-template-columns: repeat(8, 1fr); border-left: 1px solid var(--rule); margin-top: 28px; }
+.rp-cell { display: flex; flex-direction: column; gap: 4px; padding: 14px 12px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); min-width: 0; color: var(--ink); }
+.rp-cell:hover { background: var(--wash); }
+.rp-cell .tk { font-family: var(--f-serif); font-size: 19px; }
+.rp-cell .num { font-family: var(--f-mono), monospace; font-size: 15px; font-variant-numeric: tabular-nums; }
+.rp-sub { font-family: var(--f-mono), monospace; font-size: 10.5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rp-result { margin-top: 32px; border-top: 1px solid var(--ink); padding-top: 16px; opacity: 0.25; transition: opacity 0.6s ease; }
+.rp-result.on { opacity: 1; }
+.rp-res-grid { display: grid; grid-template-columns: repeat(3, 1fr); margin: 14px 0 12px; }
+.rp-res-grid > div { display: flex; flex-direction: column; gap: 6px; padding: 8px 20px 8px 0; }
+@media (max-width: 1000px) { .rp-grid { grid-template-columns: repeat(4, 1fr); } .rp-head { grid-template-columns: 1fr; gap: 14px; } }
+@media (max-width: 640px) {
+  .rp-controls { grid-template-columns: auto auto minmax(0, 1fr); }
+  .rp-controls .btn { min-width: 0; padding-left: 14px; padding-right: 14px; }
+  .rp-track { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
+  .rp-night { grid-column: 3; grid-row: 1; justify-self: end; min-width: 0; }
+  .rp-night .label { display: none; }
+  .rp-night select { max-width: 100%; }
+  .rp-stage { height: 56vh; min-height: 360px; }
+  .rp-res-grid { grid-template-columns: 1fr 1fr; }
+  .rp-marks span:nth-child(2) { display: none; }
+}
+
+/* record: the heatmap of every open */
+.heat-t { border-collapse: separate; border-spacing: 2px; width: 100%; min-width: 760px; table-layout: fixed; }
+.heat-t thead th { height: 30px; position: relative; padding: 0; font-weight: 400; }
+.heat-t thead th span { position: absolute; left: 0; bottom: 4px; font-family: var(--f-mono), monospace; font-size: 10px; letter-spacing: 0.04em; color: var(--mute); white-space: nowrap; }
+.heat-t thead th.live::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ink); }
+.heat-t tbody th { width: 64px; text-align: left; font-family: var(--f-mono), monospace; font-size: 11.5px; letter-spacing: 0.06em; font-weight: 400; padding-right: 8px; }
+.heat-t tbody th a { color: var(--ink); }
+.heat-t td { height: 22px; border-radius: 1px; position: relative; }
+.heat-t td.none { background: transparent; outline: 1px dashed var(--rule); outline-offset: -1px; }
+.heat-t td.lost::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--bg); box-shadow: 0 0 0 1px var(--ink); }
+.heat-key { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 16px; }
+.heat-ramp { width: 120px; height: 10px; background: linear-gradient(90deg, color-mix(in srgb, var(--ink) 6%, transparent), var(--ink)); }
+.heat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg); box-shadow: 0 0 0 1px var(--ink); margin-left: 8px; }
+.heat-live { width: 18px; height: 2px; background: var(--ink); margin-left: 8px; }
+
+/* ledger: live or replayed */
+.pill { display: inline-block; font-family: var(--f-mono), monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--rule-2); color: var(--mute); border-radius: 2px; white-space: nowrap; }
+.pill.on { border-color: var(--ink); color: var(--ink); }
+.ledger-log td { white-space: nowrap; }
+
+/* formulas: Plex Mono has no Greek or math glyphs, so those fall to a real math face, never a random system font */
+.formula { font-family: var(--f-mono), "Cambria Math", "STIX Two Math", "Noto Sans Math", "Segoe UI Symbol", ui-monospace, monospace; }
+.formula sub { font-size: 0.72em; line-height: 0; vertical-align: -0.25em; }

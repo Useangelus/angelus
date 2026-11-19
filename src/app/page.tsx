@@ -68,14 +68,14 @@ export default async function Home() {
           <div className="last-morning">
             <div className="lm-head">
               <span className="label">The last morning · {dayLabel(lastDay)}{lastRows[0]?.src === "live" ? " · locked live" : ""}</span>
-              <Link href="/record" className="label u">Full record →</Link>
+              <span style={{ display: "flex", gap: 18 }}><Link href={`/replay/${lastDay}`} className="label u">Replay the night →</Link><Link href="/record" className="label u">Full record →</Link></span>
             </div>
             <div className="lm-grid">
               <div><span className="label">The Bell missed by</span><span className="lm-v">{bp(lastBell)}<small> bp</small></span><span className="lm-s">average of {lastRows.length} opens</span></div>
               <div><span className="label">Opens where it closed</span><span className="lm-v mute">{bp(lastFlat)}<small> bp</small></span><span className="lm-s">the baseline to beat</span></div>
               <div><span className="label">Beat the baseline</span><span className="lm-v">{lastBeat}<small> of {lastRows.length}</small></span><span className="lm-s">stocks that morning</span></div>
               {best ? <div><span className="label">Closest call</span><span className="lm-v"><Link href={`/s/${best.r.ticker}`} className="u">{best.r.ticker}</Link></span><span className="lm-s">missed by {bp(best.e)} bp</span></div> : null}
-              {mover ? <div><span className="label">Biggest move</span><span className="lm-v"><Link href={`/s/${mover.ticker}`} className="u">{mover.ticker}</Link></span><span className="lm-s">{pct(mover.open / mover.close - 1)} at the open · Bell {bp(errOf(mover, "bell"))} bp</span></div> : null}
+              {mover ? <div><span className="label">Biggest move</span><span className="lm-v"><Link href={`/s/${mover.ticker}`} className="u">{mover.ticker}</Link></span><span className="lm-s">{pct(mover.open / mover.close - 1)} at the open · Bell missed by {bp(errOf(mover, "bell"))} bp</span></div> : null}
             </div>
           </div>
         </section>
@@ -133,7 +133,7 @@ export default async function Home() {
         <div className="wrap">
           <div className="sec-head">
             <span className="label">II · The offices</span>
-            <h2 className="h2">Three agents read the night. <em>One bell</em> speaks for them.</h2>
+            <h2 className="h2">Three agents read the night. <em>One Bell</em> speaks for them.</h2>
           </div>
           <div className={s.offices}>
             {AGENTS.map((a) => {
@@ -171,7 +171,7 @@ export default async function Home() {
             {bell.n > 0 ? (
               <>
                 <p>
-                  Over the last {days.length} trading sessions ({dayLabel(days[0])} to {dayLabel(days[days.length - 1])}), The Bell missed the official open by <b className="num">{bp(bell.mae)} bp</b> on average across {bell.n} stock-mornings.
+                  Over the last {days.length} trading sessions ({dayLabel(days[0])} to {dayLabel(days[days.length - 1])}), the Bell missed the official open by <b className="num">{bp(bell.mae)} bp</b> on average across {bell.n} stock-mornings.
                   Reading the Robinhood Chain price alone missed by <b className="num">{bp(raw.mae)} bp</b>. Assuming nothing moved overnight missed by <b className="num">{bp(flat.mae)} bp</b>.
                 </p>
                 <p>{beat ? "The blend earns its place: it beats the raw chain price." : "The raw chain price is still the better guess. The record says so on the front page, and the agents' weights adjust from it."}</p>

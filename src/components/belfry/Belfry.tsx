@@ -56,7 +56,10 @@ export default function Belfry({
   focusY = 0.5,
   fill = 0.9,
   showLabels = true,
+  driver,
 }: {
+  /** Replay: when set, the bells, the sky and the lock follow this instead of the wall clock (read every frame). */
+  driver?: React.MutableRefObject<{ gaps: (number | null)[]; at: number; swinging: boolean } | null>;
   /** Share of the frame height the bells may take. */
   fill?: number;
   showLabels?: boolean;
@@ -238,7 +241,10 @@ export default function Belfry({
     let skyMinute = -1;
     function refreshSky(now: number) {
       const m = nyMinutes(now);
-      if (m === skyMinute) return;
+      // a replay races through the night: repaint the sky every ten minutes of it, not every frame
+      const step = driver?.current ? 10 : 1;
+      const dm = Math.abs(m - skyMinute);
+      if (skyMinute >= 0 && Math.min(dm, 1440 - dm) < step) return;
       skyMinute = m;
       const s = skyAt(m);
       paintSky(skyCtx, 2048, 1228, s, 7, light);
@@ -291,10 +297,11 @@ export default function Belfry({
       if (weak && now - lastDraw < 32) { if (visible) raf = requestAnimationFrame(frame); return; }
       lastDraw = now;
       const t = (now - t0) / 1000;
-      const wall = Date.now();
+      const d = driver?.current ?? null;
+      const wall = d ? d.at : Date.now();
       refreshSky(wall);
       const c = clock(wall);
-      const swinging = c.phase === "night" && !c.locked && !reduce;
+      const swinging = d ? d.swinging && !reduce : c.phase === "night" && !c.locked && !reduce;
       // Scroll: as the tower slides out of view the camera draws back and down, and the
       // room dims, so the bells recede instead of simply scrolling away. Mouse adds a little parallax.
       if (!reduce) {
@@ -307,6 +314,14 @@ export default function Belfry({
       }
       const sel = selRef.current;
       items.forEach((it, i) => {
+        if (d) {
+          // follow the replayed move smoothly
+          const g = d.gaps[i] ?? 0;
+          const amp = d.gaps[i] == null ? 0 : Math.min(0.5, Math.max(0.035, Math.abs(g) * 16));
+          const bias = Math.sign(g) * Math.min(0.22, Math.abs(g) * 7);
+          it.amp += (amp - it.amp) * 0.08;
+          it.bias += (bias - it.bias) * 0.08;
+        }
         const since = (now - it.ring) / 1000;
         const ring = since < 6 ? 0.28 * Math.exp(-since / 1.5) * Math.sin(since * 5.2) : 0;
         const swing = swinging ? it.amp * Math.sin(it.w * t + it.phase) : 0;
@@ -353,7 +368,7 @@ export default function Belfry({
       skyTex.dispose(); env.dispose(); pmrem.dispose(); renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [bells, focusY, fill, gl]);
+  }, [bells, focusY, fill, gl, driver]);
 
   if (!gl) {
     // No WebGL: the same bells as flat marks, still pickable.

@@ -55,7 +55,7 @@ export default function FootStatus({ seal, contract, explorer }: { seal: Seal; c
         <span className="label">Last seal</span>
         {seal ? (
           <>
-            <span className="fs-v">{dayLabel(seal.session)}</span>
+            <span className="fs-v"><a href={`/verify?session=${seal.session}`} className="u" style={{ fontFamily: "var(--f-serif)", fontSize: "inherit" }}>{dayLabel(seal.session)}</a></span>
             <span className="fs-s">{seal.tx ? <a href={`${explorer}/tx/${seal.tx}`} target="_blank" rel="noreferrer" className="u">tx {short(seal.tx)}</a> : "on Robinhood Chain"}</span>
           </>
         ) : (

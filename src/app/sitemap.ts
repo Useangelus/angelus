@@ -16,6 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ["/board", "hourly", 0.9],
     ["/edition", "daily", 0.8],
     ["/record", "daily", 0.8],
+    ["/verify", "daily", 0.7],
+    ["/ledger", "daily", 0.7],
     ["/calls", "hourly", 0.8],
     ["/watch", "daily", 0.6],
     ["/flow", "hourly", 0.6],

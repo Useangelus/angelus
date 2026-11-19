@@ -96,11 +96,18 @@ export default async function BoardPage() {
           )}
         </div>
         <div className="grid-2" style={{ marginTop: 40 }}>
+          {day ? (
+          <p className="note">
+            Bell miss and chain miss are how far the Bell and the raw Robinhood Chain price, both locked at 04:00 ET, landed from the official open, in basis points (100 bp = 1%).
+            Last is the stock&apos;s latest trade on the exchange; token premium is how far the Robinhood Chain token trades above (+) or below (−) that price right now.
+          </p>
+          ) : (
           <p className="note">
             Close is the official close of {dayLabel(b.clock.refDay)}. Chain columns are the depth-weighted price of every pool holding that stock&apos;s token
             (Robinhood&apos;s own stock tokens on Robinhood Chain, xStocks on Solana, Ondo on Ethereum), with mispriced or stale pools dropped.
             A <s>struck-through</s> price is one Lauds set aside tonight: too shallow, or more than 1% away from the other chains.
           </p>
+          )}
           <p className="note">
             The Bell weights Lauds {Math.round((b.rows[0]?.params.weights.lauds ?? 0) * 100)}%, Terce {Math.round((b.rows[0]?.params.weights.terce ?? 0) * 100)}% and Compline {Math.round((b.rows[0]?.params.weights.compline ?? 0) * 100)}% tonight,
             from their errors over the last 20 sessions. <Link href="/docs" className="u">How each agent works</Link>.

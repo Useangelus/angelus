@@ -134,3 +134,12 @@ export async function sealSession(session: string, rows: LockRow[]): Promise<Sea
   await kvSet("seals", { ...seals, [session]: rec });
   return rec;
 }
+
+/** What BellRegistry holds for one session, read straight from Robinhood Chain. Null when nothing is sealed. */
+export async function readSeal(session: string): Promise<{ digest: Hex; sealedAt: number; count: number } | null> {
+  if (!REGISTRY) return null;
+  const pub = createPublicClient({ chain: robinhood, transport: http(robinhood.rpcUrls.default.http[0], { timeout: 12_000 }) });
+  const s = await pub.readContract({ address: REGISTRY as `0x${string}`, abi: ABI, functionName: "sealOf", args: [Number(session.replaceAll("-", ""))] });
+  if (s.digest === `0x${"0".repeat(64)}`) return null;
+  return { digest: s.digest, sealedAt: Number(s.sealedAt) * 1000, count: Number(s.count) };
+}

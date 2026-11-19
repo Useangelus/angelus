@@ -26,16 +26,19 @@ export default async function Footer() {
               <li><Link href="/watch">Night Watch</Link></li>
               <li><Link href="/flow">Flow</Link></li>
               <li><Link href="/calls">Calls &amp; season</Link></li>
+              <li><Link href="/token">$ANGELUS</Link></li>
+              <li><a href="/calendar.ics">Add to calendar</a></li>
             </ul>
           </div>
           <div>
             <p className="label" style={{ marginBottom: 14 }}>The proof</p>
             <ul>
               <li><Link href="/record">Track record</Link></li>
+              <li><Link href="/verify">Verify a seal</Link></li>
+              <li><Link href="/ledger">The ledger</Link></li>
+              <li><Link href="/replay">Replay a night</Link></li>
               <li><Link href="/docs">Method</Link></li>
-              <li><Link href="/docs#seal">The seal</Link></li>
               <li><Link href="/docs#open-data">Open data</Link></li>
-              <li><Link href="/token">$ANGELUS</Link></li>
             </ul>
           </div>
           <div>

@@ -9,6 +9,7 @@ import { bp } from "@/lib/format";
 import { dayLabel } from "@/lib/clock";
 import Spark from "@/components/Spark";
 import RunningChart from "@/components/RunningChart";
+import Heatmap from "@/components/Heatmap";
 
 export const revalidate = 300;
 export const metadata: Metadata = pageMeta({ title: "Record", description: "Every estimate ANGELUS published, scored against the official opening price.", path: "/record" });
@@ -78,6 +79,14 @@ export default async function RecordPage() {
         <div className="sec-head"><span className="label">Over time</span><h2 className="h2">What the night <em>is worth.</em></h2></div>
         <div className="only-wide"><RunningChart bell={errsBy(rows, days, "bell")} flat={errsBy(rows, days, "close")} /></div>
         <div className="only-narrow"><RunningChart bell={errsBy(rows, days, "bell")} flat={errsBy(rows, days, "close")} width={440} height={320} /></div>
+      </section>
+
+      <section className="sec" id="heatmap" style={{ scrollMarginTop: 90 }}>
+        <div className="sec-head"><span className="label">Every open</span><h2 className="h2">Sixteen stocks, <em>every morning.</em></h2></div>
+        <Heatmap rows={rows} days={days} tickers={LISTINGS.map((l) => l.ticker)} />
+        <p className="note" style={{ marginTop: 14 }}>
+          Watch any night again on the <Link href="/replay" className="u">replay</Link>, or check a sealed night on the <Link href="/verify" className="u">verify page</Link>. Every lock and seal is on the <Link href="/ledger" className="u">ledger</Link>.
+        </p>
       </section>
 
       <section className="sec">

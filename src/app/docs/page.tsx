@@ -34,7 +34,7 @@ export default function Docs() {
             <h3 id="clock" style={{ scrollMarginTop: 90 }}>The clock</h3>
             <p>
               The night runs from the official close to the next official open, skipping weekends and exchange holidays. At <b>04:00 ET</b> the numbers are locked for scoring.
-              That is when Wall Street&apos;s own pre-market begins, so the locked number is made from on-chain trading alone. The live number keeps updating after the lock; only the 04:00 number is graded.
+              That is when Wall Street&apos;s own pre-market begins, so the locked number is made from on-chain trading alone. The live number keeps updating after the lock; only the 04:00 number is graded. <a href="/calendar.ics" className="u">Add the close, the lock and the open to your calendar</a>, or <Link href="/replay" className="u">watch a past night replayed</Link>.
             </p>
             <h3>The score</h3>
             <p>
@@ -74,18 +74,18 @@ export default function Docs() {
         <div className="sec-head"><span className="label">The agents</span><h2 className="h2">Four formulas, <em>in plain words.</em></h2></div>
         <div style={{ borderTop: "1px solid var(--rule-2)" }}>
           {[
-            ["lauds", "Lauds = Σ priceᶜ · √depthᶜ / Σ √depthᶜ", "over the chains c where the stock trades with at least $25,000 of depth and within 1% of the middle chain by price (one vote per chain; with two chains, Robinhood Chain is the reference)."],
-            ["terce", "Terce = close · (1 + β·m + ½·(r − β·m))", "r = Robinhood Chain move since the close, m = SPY token move since the close, β = 60-day daily beta to SPY."],
-            ["compline", "Compline = close · (1 + k·r)", "k = how much of the token's overnight move past opens kept: the least-squares slope of open move on token move over this stock's last 30 scored nights (0.85 until there are five)."],
-            ["bell", "Bell = Σ wₐ · estimateₐ, with wₐ ∝ 1 / (average miss of a)²", "average miss over the last 20 scored sessions, all stocks pooled. Equal weights until each agent has ten scored mornings."],
-          ].map(([id, f, note]) => {
+            ["lauds", <>Lauds = Σ price<sub>c</sub> · √depth<sub>c</sub> / Σ √depth<sub>c</sub></>, "over the chains c where the stock trades with at least $25,000 of depth and within 1% of the middle chain by price (one vote per chain; with two chains, Robinhood Chain is the reference)."],
+            ["terce", <>Terce = close · (1 + β·m + ½·(r − β·m))</>, "r = Robinhood Chain move since the close, m = SPY token move since the close, β = 60-day daily beta to SPY."],
+            ["compline", <>Compline = close · (1 + k·r)</>, "k = the share of the token's overnight move that past opens kept: the least-squares slope of open move on token move over this stock's last 30 scored nights (0.85 until there are five)."],
+            ["bell", <>Bell = Σ w<sub>a</sub> · estimate<sub>a</sub>, with w<sub>a</sub> ∝ 1 / (average miss of a)²</>, "average miss over the last 20 scored sessions, all stocks pooled. Equal weights until each agent has ten scored mornings."],
+          ].map(([id, f, note]) => [id as string, f, note as string] as const).map(([id, f, note]) => {
             const a = AGENTS.find((x) => x.id === id)!;
             return (
               <div key={id} style={{ display: "grid", gridTemplateColumns: "minmax(140px, 220px) 1fr", gap: 28, padding: "28px 0", borderBottom: "1px solid var(--rule)" }} className="doc-row">
                 <h3 className="it" style={{ fontSize: 34, color: id === "bell" ? "var(--bronze)" : undefined }}>{a.name}</h3>
                 <div>
                   <p style={{ margin: "0 0 10px", fontSize: 20 }}>{a.method}</p>
-                  <p className="num" style={{ margin: "0 0 6px", fontSize: 14, color: "var(--ink)" }}>{f}</p>
+                  <p className="num formula" style={{ margin: "0 0 6px", fontSize: 14, color: "var(--ink)" }}>{f}</p>
                   <p className="note" style={{ margin: 0 }}>{note}</p>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export default function Docs() {
               The contract holds no money and decides nothing; it only keeps the receipt.
             </p>
             <p className="note">
-              To check a night yourself: take its numbers from <a href="/api/seals" className="u num">/api/seals</a>, compute keccak256(abi.encode(session, tickers, closes, bells)) with the session as yyyymmdd, tickers as ascending bytes8 and prices in dollars with 6 decimals, and compare it with sealOf(session) on the contract, or call verify(...) directly.
+              To check a night yourself: take its numbers from <a href="/api/seals" className="u num">/api/seals</a>, compute keccak256(abi.encode(session, tickers, closes, bells)) with the session as yyyymmdd, tickers as ascending bytes8 and prices in dollars with 6 decimals, and compare it with sealOf(session) on the contract, or call verify(...) directly. Or let the <Link href="/verify" className="u">verify page</Link> do it in your browser; every lock and seal is on the <Link href="/ledger" className="u">ledger</Link>.
             </p>
           </div>
           <div style={{ borderTop: "1px solid var(--rule-2)" }}>
