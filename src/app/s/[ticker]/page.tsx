@@ -5,7 +5,7 @@ import { getRow } from "@/lib/live";
 import { LISTINGS, CHAINS, listing, type ChainId } from "@/lib/registry";
 import { hourly } from "@/lib/sources";
 import { AGENTS } from "@/lib/agents";
-import { errOf } from "@/lib/record";
+import { errOf, summarize } from "@/lib/record";
 import { money, pct, move, tone, bp, compact, dexName } from "@/lib/format";
 import { dayLabel } from "@/lib/clock";
 import NightChart from "@/components/NightChart";
@@ -45,6 +45,10 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
   const gap = move(row.est.bell, row.close);
   const hist = board.record.rows.filter((r) => r.ticker === row.ticker).sort((a, b) => b.session.localeCompare(a.session)).slice(0, 15);
   const pools = row.pairs.filter((p) => p.liq >= 5000).sort((a, b) => b.liq - a.liq);
+  const TOP = 8;
+  const depth = pools.reduce((a, p) => a + p.liq, 0);
+  const mine = summarize(board.record.rows.filter((r) => r.ticker === row.ticker));
+  const mBell = mine.find((x) => x.who === "bell")!, mFlat = mine.find((x) => x.who === "close")!;
   const w = row.params.weights;
   const inputs: Record<string, string> = {
     lauds: row.chains.map((c) => `${CHAINS[c.chain].short} ${money(c.price)}`).join(" · ") || "no chain quotes",
@@ -70,6 +74,16 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
       </header>
     </StockBell>
     <div className="wrap">
+
+      <div className="last-morning" style={{ marginTop: 40 }}>
+        <div className="lm-grid">
+          <div><span className="label">{day ? "The Bell's gap" : "Overnight so far"}</span><span className={`lm-v ${tone(gap)}`}>{pct(gap)}</span><span className="lm-s">vs the {dayLabel(row.refDay)} close</span></div>
+          <div><span className="label">On-chain depth</span><span className="lm-v">{compact(depth)}</span><span className="lm-s">{pools.length} pools · {row.chains.length} chains</span></div>
+          <div><span className="label">The Bell here</span><span className="lm-v">{mBell.n ? bp(mBell.mae) : "—"}<small> bp</small></span><span className="lm-s">average miss · {mBell.n} mornings</span></div>
+          <div><span className="label">Opens where it closed</span><span className="lm-v mute">{mFlat.n ? bp(mFlat.mae) : "—"}<small> bp</small></span><span className="lm-s">the baseline on this stock</span></div>
+          <div><span className="label">Right direction</span><span className="lm-v">{mBell.hit != null ? `${Math.round(mBell.hit * 100)}%` : "—"}</span><span className="lm-s">of those mornings</span></div>
+        </div>
+      </div>
 
       {note && (
         <section style={{ padding: "40px 0 0" }}>
@@ -124,7 +138,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
               <table className="ledger">
                 <thead><tr><th>Chain · venue</th><th>Pair</th><th>Price</th><th>Depth</th><th>24h vol</th></tr></thead>
                 <tbody>
-                  {pools.map((p) => (
+                  {pools.slice(0, TOP).map((p) => (
                     <tr key={p.pair}>
                       <td style={{ fontFamily: "var(--f-serif)", fontSize: 16 }}>
                         <a href={`${CHAINS[p.chain as ChainId].explorer}${p.pair}`} target="_blank" rel="noreferrer" className="u">{CHAINS[p.chain].label}</a>
@@ -138,6 +152,27 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                   ))}
                 </tbody>
               </table>
+              {pools.length > TOP ? (
+                <details className="more-pools">
+                  <summary className="label u">All {pools.length} pools</summary>
+                  <table className="ledger">
+                    <tbody>
+                      {pools.slice(TOP).map((p) => (
+                    <tr key={p.pair}>
+                      <td style={{ fontFamily: "var(--f-serif)", fontSize: 16 }}>
+                        <a href={`${CHAINS[p.chain as ChainId].explorer}${p.pair}`} target="_blank" rel="noreferrer" className="u">{CHAINS[p.chain].label}</a>
+                        <small className="label" style={{ display: "block" }}>{dexName(p.dex)} · {l.venues[p.chain]?.issuer}</small>
+                      </td>
+                      <td className="mute">{row.ticker}/{p.quote}</td>
+                      <td>{money(p.price)}</td>
+                      <td>{compact(p.liq)}</td>
+                      <td className="mute">{compact(p.vol24)}</td>
+                    </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </details>
+              ) : null}
             </div>
           </div>
           <div>

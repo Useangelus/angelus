@@ -2,7 +2,7 @@ import Link from "next/link";
 import { TickerCell } from "@/components/BellGlyph";
 import { getBoard } from "@/lib/live";
 import { AGENTS } from "@/lib/agents";
-import { summarize, bySession, sessionsOf } from "@/lib/record";
+import { summarize, bySession, sessionsOf, errOf } from "@/lib/record";
 import { money, pct, move, tone, bp } from "@/lib/format";
 import { dayLabel } from "@/lib/clock";
 import BelfryHero from "@/components/belfry/BelfryHero";
@@ -40,6 +40,16 @@ export default async function Home() {
   const days = sessionsOf(b.record.rows);
   const beat = bell.n > 0 && bell.mae < raw.mae;
 
+  // The last graded morning, in one glance: how far the Bell missed against "it opens where it closed".
+  const lastDay = days[days.length - 1];
+  const lastRows = lastDay ? b.record.rows.filter((r) => r.session === lastDay) : [];
+  const mean = (xs: (number | null)[]) => { const v = xs.filter((x): x is number => x != null); return v.length ? v.reduce((a, c) => a + c, 0) / v.length : null; };
+  const lastBell = mean(lastRows.map((r) => errOf(r, "bell")));
+  const lastFlat = mean(lastRows.map((r) => errOf(r, "close")));
+  const lastBeat = lastRows.filter((r) => { const e = errOf(r, "bell"), c = errOf(r, "close"); return e != null && c != null && e < c; }).length;
+  const best = lastRows.map((r) => ({ r, e: errOf(r, "bell") })).filter((x) => x.e != null).sort((x, y) => x.e! - y.e!)[0];
+  const mover = lastRows.slice().sort((x, y) => Math.abs(y.open / y.close - 1) - Math.abs(x.open / x.close - 1))[0];
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: LD }} />
@@ -52,6 +62,24 @@ export default async function Home() {
       <section className="wrap">
         <Horae />
       </section>
+
+      {lastDay && lastBell != null && lastFlat != null ? (
+        <section className="wrap">
+          <div className="last-morning">
+            <div className="lm-head">
+              <span className="label">The last morning · {dayLabel(lastDay)}{lastRows[0]?.src === "live" ? " · locked live" : ""}</span>
+              <Link href="/record" className="label u">Full record →</Link>
+            </div>
+            <div className="lm-grid">
+              <div><span className="label">The Bell missed by</span><span className="lm-v">{bp(lastBell)}<small> bp</small></span><span className="lm-s">average of {lastRows.length} opens</span></div>
+              <div><span className="label">Opens where it closed</span><span className="lm-v mute">{bp(lastFlat)}<small> bp</small></span><span className="lm-s">the baseline to beat</span></div>
+              <div><span className="label">Beat the baseline</span><span className="lm-v">{lastBeat}<small> of {lastRows.length}</small></span><span className="lm-s">stocks that morning</span></div>
+              {best ? <div><span className="label">Closest call</span><span className="lm-v"><Link href={`/s/${best.r.ticker}`} className="u">{best.r.ticker}</Link></span><span className="lm-s">missed by {bp(best.e)} bp</span></div> : null}
+              {mover ? <div><span className="label">Biggest move</span><span className="lm-v"><Link href={`/s/${mover.ticker}`} className="u">{mover.ticker}</Link></span><span className="lm-s">{pct(mover.open / mover.close - 1)} at the open · Bell {bp(errOf(mover, "bell"))} bp</span></div> : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="sec" style={{ marginTop: 72 }}>
         <div className="wrap">

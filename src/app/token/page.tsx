@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/meta";
 import SkyBand from "@/components/belfry/SkyBand";
 import Link from "next/link";
+import CopyCA from "@/components/CopyCA";
+import { EXPLORER } from "@/lib/seal";
 
 export const metadata: Metadata = pageMeta({ title: "$ANGELUS", description: "The ANGELUS token on Robinhood Chain.", path: "/token" });
 
 export default function TokenPage() {
   const ca = process.env.NEXT_PUBLIC_TOKEN_CA;
+  const trade = process.env.NEXT_PUBLIC_TOKEN_TRADE_URL; // the token's page on Pons, set at launch
   return (
     <>
     <SkyBand>
@@ -18,9 +21,14 @@ export default function TokenPage() {
         <div className="prose" style={{ alignSelf: "end" }}>
           {ca ? (
             <>
-              <p className="label">Contract</p>
-              <p className="num" style={{ fontSize: 15, wordBreak: "break-all", color: "var(--ink)" }}>{ca}</p>
-              <p><a className="u" href={`https://dexscreener.com/robinhood/${ca}`} target="_blank" rel="noreferrer">Chart on DexScreener</a></p>
+              <p className="label">Contract · Robinhood Chain</p>
+              <CopyCA ca={ca} />
+              <div className="token-links">
+                {trade ? <a className="btn" href={trade} target="_blank" rel="noreferrer">Trade on Pons →</a> : null}
+                <a className="btn ghost" href={`https://dexscreener.com/robinhood/${ca}`} target="_blank" rel="noreferrer">Chart · DexScreener</a>
+                <a className="btn ghost" href={`${EXPLORER}/token/${ca}`} target="_blank" rel="noreferrer">Explorer · Blockscout</a>
+              </div>
+              <p className="note">This is the only address. Any other contract using the name is not ours.</p>
             </>
           ) : (
             <p className="mute">No contract address is published yet. When it is, it will appear on this page and nowhere else first. Any address you see before that is not ours.</p>

@@ -3,16 +3,20 @@ import { TickerCell } from "@/components/BellGlyph";
 import SkyBand from "@/components/belfry/SkyBand";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/meta";
-import { getRecord, summarize, bySession, sessionsOf, errOf, type Scored } from "@/lib/record";
+import { getRecord, summarize, bySession, sessionsOf, errOf, type Scored, type SessionRow } from "@/lib/record";
 import { LISTINGS } from "@/lib/registry";
 import { bp } from "@/lib/format";
 import { dayLabel } from "@/lib/clock";
 import Spark from "@/components/Spark";
+import RunningChart from "@/components/RunningChart";
 
 export const revalidate = 300;
 export const metadata: Metadata = pageMeta({ title: "Record", description: "Every estimate ANGELUS published, scored against the official opening price.", path: "/record" });
 
 const NAMES: Record<Scored, string> = { bell: "The Bell", lauds: "Lauds", terce: "Terce", compline: "Compline", raw: "Raw chain price", close: "No move (prior close)" };
+
+const errsBy = (rows: SessionRow[], days: string[], who: Scored) =>
+  days.map((session) => ({ session, errs: rows.filter((r) => r.session === session).map((r) => errOf(r, who)).filter((x): x is number => x != null) }));
 
 export default async function RecordPage() {
   const rec = await getRecord();
@@ -68,6 +72,12 @@ export default async function RecordPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="sec">
+        <div className="sec-head"><span className="label">Over time</span><h2 className="h2">What the night <em>is worth.</em></h2></div>
+        <div className="only-wide"><RunningChart bell={errsBy(rows, days, "bell")} flat={errsBy(rows, days, "close")} /></div>
+        <div className="only-narrow"><RunningChart bell={errsBy(rows, days, "bell")} flat={errsBy(rows, days, "close")} width={440} height={320} /></div>
       </section>
 
       <section className="sec">

@@ -31,6 +31,11 @@ export default function Masthead() {
   const open = openOn === path;
   const setOpen = (f: (o: boolean) => boolean) => setOpenOn(f(open) ? path : null);
   // Escape closes the open menu.
+  // the page behind the open menu stays put
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpenOn(null); };
@@ -67,6 +72,11 @@ export default function Masthead() {
           {NAV.map(([href, label]) => (
             <Link key={href} href={href} aria-current={path.startsWith(href) ? "page" : undefined}>{label}</Link>
           ))}
+          {/* the phone menu ends with the clock, the bells' sound and the socials */}
+          <div className="menu-clock" aria-hidden={!open}>
+            <span className="label">{label || " "}</span>
+            <b>{c ? `in ${span(target - c.now)}` : " "}</b>
+          </div>
           <SoundToggle inMenu />
           <Social labels className="social-menu" />
         </nav>
