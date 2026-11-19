@@ -15,6 +15,19 @@ export interface Replay { session: string; prevDay: string; start: number; lock:
 const HISTORY = 400; // hours of candles asked for: a little over two weeks
 const ORDER: ChainId[] = ["robinhood", "ethereum", "solana"];
 
+// One pool's candles serve every night in the window, so each answer is kept for an hour on its own. An empty
+// answer (rate-limited, or no history) is not kept: the next visit asks again only for what is still missing.
+const pooled = unstable_cache(
+  async (chain: ChainId, pool: string) => {
+    const got = await hourly(chain, pool, 3600, HISTORY);
+    if (!got.length) throw new Error("no candles");
+    return got;
+  },
+  ["replay-candles-v1"],
+  { revalidate: 3600 },
+);
+const candlesOf = (chain: ChainId, pool: string) => pooled(chain, pool).catch(() => [] as number[][]);
+
 /** Nights that can be replayed: graded, and recent enough to still have hourly candles. */
 export async function replayable(): Promise<string[]> {
   const rec = await getRecord();
@@ -45,7 +58,7 @@ async function build(session: string): Promise<Replay | null> {
       for (const c of ORDER) {
         const pool = l.venues[c]?.pool;
         if (!pool) continue;
-        const got = await hourly(c, pool, 3600, HISTORY);
+        const got = await candlesOf(c, pool);
         if (got.some((k) => k[0] * 1000 >= start - 6 * 3600_000 && k[0] * 1000 <= end)) { chain = c; candles = got; break; }
       }
       // the price at each frame: the last hourly close at or before it, carried forward through quiet hours
@@ -73,7 +86,7 @@ const kept = unstable_cache(
     if (!full) throw new Partial(night);
     return night;
   },
-  ["replay-night-v1"],
+  ["replay-night-v2"],
   { revalidate: 3600 },
 );
 

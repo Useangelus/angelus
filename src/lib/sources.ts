@@ -110,7 +110,11 @@ export async function hourly(chain: ChainId, pool: string, revalidate = 0, limit
     const init: RequestInit = revalidate ? { next: { revalidate }, signal: AbortSignal.timeout(6000) } : { cache: "no-store", signal: AbortSignal.timeout(60000) };
     try {
       const r = await fetch(`https://api.geckoterminal.com/api/v2/networks/${net}/pools/${pool}/ohlcv/hour?limit=${limit}&currency=usd&token=base`, { ...init, headers: { accept: "application/json", ...UA } });
-      if (r.status === 429) { await new Promise((s) => setTimeout(s, 15000)); continue; }
+      if (r.status === 429) {
+        if (revalidate) return []; // a page render never waits out a rate limit
+        await new Promise((s) => setTimeout(s, 15000));
+        continue;
+      }
       if (!r.ok) return [];
       const j = await r.json();
       const list: number[][] = j?.data?.attributes?.ohlcv_list ?? [];
