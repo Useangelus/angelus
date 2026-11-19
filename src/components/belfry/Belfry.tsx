@@ -83,17 +83,19 @@ export default function Belfry({
     if (!el || !gl) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const coarse = window.matchMedia("(pointer: coarse)").matches;
-    // Light mode for modest devices: native resolution, no MSAA, coarser bells, ~30 fps.
+    // Light mode for modest devices: coarser bells and ~30 fps. Sharpness is never given up: most phones report
+    // 4 GB or 4 cores, and drawing them at 1x without anti-aliasing on a 3x screen made the bells look jagged.
     const nav = navigator as Navigator & { deviceMemory?: number };
     const weak = (nav.deviceMemory ?? 8) <= 4 || (navigator.hardwareConcurrency ?? 8) <= 4;
 
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: !weak, alpha: false, powerPreference: weak ? "low-power" : "high-performance" });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: weak ? "low-power" : "high-performance" });
     } catch {
       return;
     }
-    renderer.setPixelRatio(weak ? 1 : Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2));
+    // at least 2x on phones (the canvas is small, so this stays cheap), at most 2x anywhere
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, weak && !coarse ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     el.prepend(renderer.domElement);
