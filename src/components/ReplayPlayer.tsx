@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { candleUrl, covers, framesOf, type Net } from "@/lib/frames";
 
 const Belfry = dynamic(() => import("./belfry/Belfry"), { ssr: false, loading: () => <div style={{ position: "absolute", inset: 0 }} /> });
 
@@ -15,7 +16,7 @@ export interface ReplayData {
   end: number;
   hours: number[];
   live: boolean;
-  stocks: { ticker: string; name: string; close: number; bell: number | null; open: number; gaps: (number | null)[] }[];
+  stocks: { ticker: string; name: string; close: number; bell: number | null; open: number; pools?: { chain: Net; pool: string }[]; gaps: (number | null)[] }[];
 }
 
 const RUN_MS = 26_000; // the whole night, played at 1x
@@ -41,14 +42,58 @@ function gapsAt(d: ReplayData, t: number): (number | null)[] {
  * One night, replayed: the belfry swings as each stock's token moved, hour by hour, under the sky of that hour.
  * At 04:00 ET the bells stop (the lock); at 09:30 ET the official open grades every Bell.
  */
-export default function ReplayPlayer({ data, sessions }: { data: ReplayData; sessions: string[] }) {
+const empty = (s: ReplayData["stocks"][number]) => !s.gaps.some((g) => g != null);
+
+export default function ReplayPlayer({ data: initial, sessions }: { data: ReplayData; sessions: string[] }) {
   const router = useRouter();
+  const [data, setData] = useState(initial);
+  const [filling, setFilling] = useState(() => initial.stocks.filter((s) => empty(s) && s.pools?.length).length);
+
+  // Any stock the server could not get history for is asked for here, from the visitor's own browser,
+  // three at a time, trying each chain's pool in turn.
+  useEffect(() => {
+    const todo = initial.stocks.filter((s) => empty(s) && s.pools?.length);
+    if (!todo.length) return;
+    let alive = true;
+    // A rate-limited answer arrives without CORS headers and fails as a network error: wait and ask again.
+    const one = async (s: (typeof todo)[number]) => {
+      for (let attempt = 0; attempt < 3 && alive; attempt++) {
+        let blocked = false;
+        for (const { chain, pool } of s.pools!) {
+          try {
+            const r = await fetch(candleUrl(chain, pool), { headers: { accept: "application/json" } });
+            if (r.status === 429) { blocked = true; break; }
+            if (!r.ok) continue;
+            const j = await r.json();
+            const candles: number[][] = j?.data?.attributes?.ohlcv_list ?? [];
+            if (!covers(candles, initial.start, initial.end)) continue;
+            const gaps = framesOf(candles, initial.hours, s.close);
+            if (alive) setData((d) => ({ ...d, stocks: d.stocks.map((x) => (x.ticker === s.ticker ? { ...x, gaps } : x)) }));
+            return;
+          } catch {
+            blocked = true;
+            break;
+          }
+        }
+        if (!blocked) return; // every chain answered and none has this night
+        await new Promise((ok) => setTimeout(ok, 20_000 * (attempt + 1)));
+      }
+    };
+    (async () => {
+      for (let i = 0; i < todo.length && alive; i += 3) {
+        await Promise.all(todo.slice(i, i + 3).map(one));
+        if (alive) setFilling(Math.max(0, todo.length - i - 3));
+      }
+    })();
+    return () => { alive = false; };
+  }, [initial]);
   const [p, setP] = useState(0); // 0..1 through the night
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const pRef = useRef(0);
   const driver = useRef<{ gaps: (number | null)[]; at: number; swinging: boolean } | null>({ gaps: gapsAt(data, data.start), at: data.start, swinging: true });
-  const bells = useMemo(() => data.stocks.map((s) => ({ ticker: s.ticker, gap: s.gaps.find((g) => g != null) ?? null })), [data]);
+  // the tower is built once; the driver below moves it, so history arriving late never rebuilds it
+  const bells = useMemo(() => initial.stocks.map((s) => ({ ticker: s.ticker, gap: s.gaps.find((g) => g != null) ?? null })), [initial]);
   const t = data.start + (data.end - data.start) * p;
 
   // drive the tower every frame; refresh the page's numbers a few times a second
@@ -96,6 +141,7 @@ export default function ReplayPlayer({ data, sessions }: { data: ReplayData; ses
             <span className="label">{et(t, { weekday: "short", month: "short", day: "numeric" })} · New York</span>
             <span className="rp-clock">{et(t, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}</span>
             <span className="label">{phase}</span>
+            {filling > 0 ? <span className="label">Reading history · {filling} {filling === 1 ? "stock" : "stocks"} left</span> : null}
           </div>
         </div>
       </div>

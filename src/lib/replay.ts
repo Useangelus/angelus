@@ -4,15 +4,15 @@ import { LISTINGS, type ChainId } from "./registry";
 import { hourly } from "./sources";
 import { closeMinutes, nyTime, prevTradingDay } from "./clock";
 import { getRecord, sessionsOf } from "./record";
+import { HISTORY, covers, framesOf } from "./frames";
 
 // A night, hour by hour, for the replay: from the closing bell to the opening bell, how far each stock's token
 // stood from its official close. Hourly history comes from GeckoTerminal (the deepest pool per chain, Robinhood
 // Chain first), the close, the Bell and the open from the public record.
 
-export interface ReplayStock { ticker: string; name: string; close: number; bell: number | null; open: number; chain: ChainId; gaps: (number | null)[] }
+export interface ReplayStock { ticker: string; name: string; close: number; bell: number | null; open: number; chain: ChainId; pools: { chain: ChainId; pool: string }[]; gaps: (number | null)[] }
 export interface Replay { session: string; prevDay: string; start: number; lock: number; end: number; hours: number[]; stocks: ReplayStock[]; live: boolean }
 
-const HISTORY = 400; // hours of candles asked for: a little over two weeks
 const ORDER: ChainId[] = ["robinhood", "ethereum", "solana"];
 
 // One pool's candles serve every night in the window, so each answer is kept for an hour on its own. An empty
@@ -55,24 +55,18 @@ async function build(session: string): Promise<Replay | null> {
       if (!row) return null;
       let chain: ChainId = ORDER.find((c) => l.venues[c]?.pool) ?? "robinhood";
       let candles: number[][] = [];
-      for (const c of ORDER) {
-        const pool = l.venues[c]?.pool;
-        if (!pool) continue;
+      const pools = ORDER.flatMap((c) => (l.venues[c]?.pool ? [{ chain: c, pool: l.venues[c]!.pool }] : []));
+      for (const { chain: c, pool } of pools) {
         const got = await candlesOf(c, pool);
-        if (got.some((k) => k[0] * 1000 >= start - 6 * 3600_000 && k[0] * 1000 <= end)) { chain = c; candles = got; break; }
+        if (covers(got, start, end)) { chain = c; candles = got; break; }
       }
-      // the price at each frame: the last hourly close at or before it, carried forward through quiet hours
-      let k = 0, last: number | null = null;
-      const gaps = hours.map((t) => {
-        while (k < candles.length && candles[k][0] * 1000 + 3600_000 <= t) { last = candles[k][4]; k++; }
-        return last == null ? null : last / row.close - 1;
-      });
-      return { ticker: l.ticker, name: l.name, close: row.close, bell: row.est.bell, open: row.open, chain, gaps };
+      const gaps = framesOf(candles, hours, row.close);
+      return { ticker: l.ticker, name: l.name, close: row.close, bell: row.est.bell, open: row.open, chain, pools, gaps };
   };
   const stocks: (ReplayStock | null)[] = [];
   for (let i = 0; i < LISTINGS.length; i += 4) stocks.push(...(await Promise.all(LISTINGS.slice(i, i + 4).map(one))));
+  // A stock with no history here is still listed: the visitor's browser asks GeckoTerminal for it directly.
   const list = stocks.filter((s): s is ReplayStock => s != null);
-  if (!list.some((s) => s.gaps.some((g) => g != null))) return null;
   return { session, prevDay, start, lock, end, hours, stocks: list, live: rows[0].src === "live" };
 }
 
@@ -86,7 +80,7 @@ const kept = unstable_cache(
     if (!full) throw new Partial(night);
     return night;
   },
-  ["replay-night-v2"],
+  ["replay-night-v3"],
   { revalidate: 3600 },
 );
 
